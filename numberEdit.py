@@ -12,7 +12,7 @@ for i in range(3):
             relief=tk.RAISED,
             borderwidth=1
         )
-        frame.grid(row=i, column=j, padx=5, pady=5)
+        frame.grid(row=i, column=j, padx=3, pady=3)
 
         button = tk.Button(master=frame, text=f"Button {3*i+j+1}")
         button.pack(padx=5, pady=5)
