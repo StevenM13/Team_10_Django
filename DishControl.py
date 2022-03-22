@@ -14,10 +14,20 @@ import RPi.GPIO as GPIO
 import time
 
 # # Set GPIO numbering mode
-# GPIO.setmode(GPIO.BOARD)
+GPIO.setmode(GPIO.BOARD)
 
-# # Set pin 11 as an output, and set servo1 as pin 11 as PWM
-# GPIO.setup(11,GPIO.OUT)
+# Set pin 11 as an output, and set servo1 as pin 11 as PWM
+GPIO.setup(11,GPIO.OUT)
+GPIO.setup(13,GPIO.OUT)
+GPIO.setup(15,GPIO.OUT)
+GPIO.setup(16,GPIO.OUT)
+GPIO.setup(29,GPIO.OUT)
+GPIO.setup(31,GPIO.OUT)
+GPIO.setup(33,GPIO.OUT)
+GPIO.setup(35,GPIO.OUT)
+
+# self.LPWM_Output = GPIO.PWM(11,50)
+# self.RPWM_Output = GPIO.PWM(29,50)
 # servo1 = GPIO.PWM(11,50) # Note 11 is pin, 50 = 50Hz pulse
 
 # #start PWM running, but with value of 0 (pulse off)
@@ -25,48 +35,56 @@ import time
 # print ("Waiting for 2 seconds")
 # time.sleep(2)
 
-Window.clearcolor = (0.5,0.5,0.6,0.6)
+Window.clearcolor = (0.5,0.5,0.6,0.9)
+Window.fullscreen = 'auto'
 
 class DishLayout(FloatLayout):
     elevation = 45.0
     azimuth = 90.0
+    LPWM_Output = 11
+    RPWM_Output = 13
+    rotate_left = 29
+    rotate_right = 31
 
     def __init__(self,**kwargs):
         super(DishLayout,self).__init__(**kwargs)
 
-        self.elevation_label = Label(text = format(self.elevation, ".2f"), size_hint=(.1, .15),pos_hint={'x':.35, 'y':.65})
-        self.azimuth_label = Label(text = format(self.azimuth, ".2f"), size_hint=(.1, .15),pos_hint={'x':.35, 'y':.26})
-        self.movingStatus = Label(text = "Dish: SET", size_hint=(.1, .1), pos_hint={'x':.7,'y':.32})
+        self.elevation_label = Label(text = format(self.elevation, ".2f"), size_hint=(.1, .15),pos_hint={'x':.45, 'y':.62})
+        self.azimuth_label = Label(text = format(self.azimuth, ".2f"), size_hint=(.1, .15),pos_hint={'x':.45, 'y':.22})
+        self.dish_status = Label(text = "Dish Status:", size_hint=(.1, .1), pos_hint={'x':.83,'y':.45}, color = (0,0,0,1))
+        self.movingStatus = Label(text = "SET", size_hint=(.1, .1), pos_hint={'x':.83,'y':.4}, color = (0,0,0,1))
 
         # sliders
-        self.elevationControl = Slider(min = 0, max = 90, size_hint=(.43, .1), pos_hint={'x':.18,'y':.58}, value = self.elevation, step = 1, cursor_size = ("80sp", "80sp"))
+        self.elevationControl = Slider(min = 0, max = 90, size_hint=(.63, .2), pos_hint={'x':.18,'y':.49}, sensitivity = 'handle', value = self.elevation, step = 1, cursor_size = ("30sp", "40sp"))
         self.elevationControl.fbind('value', self.on_elev_slider)
         self.add_widget(self.elevationControl)
-        self.azimuthControl = Slider(min = 0, max = 180, size_hint=(.43, .1), pos_hint={'x':.18,'y':.18}, value = self.azimuth, step = 1, cursor_size = ("80sp", "80sp"))
+        self.azimuthControl = Slider(min = 0, max = 180, size_hint=(.63, .2), pos_hint={'x':.18,'y':.09}, sensitivity = 'handle', value = self.azimuth, step = 1, cursor_size = ("30sp", "40sp"))
         self.azimuthControl.fbind('value', self.on_az_slider)
         self.add_widget(self.azimuthControl)
 
-    #Main Buttons
-        self.inc_elev = Button(text = "+", size_hint=(.1, .1), pos_hint={'x':.47, 'y':.68}, on_release = self.incElev, background_color = (0.5,0.7,0.8,1))
-        self.dec_elev = Button(text = "-", size_hint=(.1, .1),pos_hint={'x':.23, 'y':.68}, on_release = self.decElev, background_color = (0.5,0.7,0.8,1))
-        self.inc_az = Button(text = "+", size_hint=(.1, .1),pos_hint={'x':.47, 'y':.28}, on_release = self.incAz, background_color = (0.5,0.7,0.8,1))
-        self.dec_az = Button(text = "-", size_hint=(.1, .1),pos_hint={'x':.23, 'y':.28}, on_release = self.decAz, background_color = (0.5,0.7,0.8,1))
-        self.execute = Button(text = "GO", size_hint = (.1,.25), pos_hint={'x':.7,'y':.4}, on_release = self.moveDish, background_color = (0,0.8,0.4,1))
-    
-    # labels
-        self.elev_text = Label(text = "Elevation", size_hint=(.1,.1), pos_hint={'x':.35,'y':.79}, color = (0,0,0,1))
-        self.elev_text.font_size = '130dp'
-        self.az_text = Label(text = "Azimuth", size_hint=(.1,.1), pos_hint={'x':.36,'y':.39}, color = (0,0,0,1))
-        self.az_text.font_size = '130dp'
+        # Buttons
+        self.inc_elev = Button(text = "+", size_hint=(.2, .15), pos_hint={'x':.62, 'y':.62}, on_release = self.incElev, background_color = (0.7,0.8,0.9,1))
+        self.dec_elev = Button(text = "-", size_hint=(.2, .15),pos_hint={'x':.18, 'y':.62}, on_release = self.decElev, background_color = (0.7,0.8,0.9,1))
+        self.inc_az = Button(text = "+", size_hint=(.2, .15),pos_hint={'x':.62, 'y':.22}, on_release = self.incAz, background_color = (0.7,0.8,0.9,1))
+        self.dec_az = Button(text = "-", size_hint=(.2, .15),pos_hint={'x':.18, 'y':.22}, on_release = self.decAz, background_color = (0.7,0.8,0.9,1))
+        self.execute = Button(text = "Execute Scroll Change", size_hint = (.25,.1), pos_hint={'x':.13,'y':.02}, on_release = self.moveDish, background_color = (0,0.8,0.4,1))
+        self.exit = Button(text = "Exit", size_hint = (.25,.1), pos_hint={'x':.63,'y':.02}, on_release = self.exitProgram, background_color = (0.6,0.1,0,1))
+        self.calibrate = Button(text = "Calibrate", size_hint = (.25,.1), pos_hint={'x':.38,'y':.02}, on_release = self.calibration, background_color = (0.8,0.8,0,1), disabled = True)
 
-        self.elevation_label.font_size = '80dp'
-        self.azimuth_label.font_size = '80dp'
+        # labels
+        self.elev_text = Label(text = "Elevation", size_hint=(.1,.1), pos_hint={'x':.45,'y':.8}, color = (0,0,0,1))
+        self.az_text = Label(text = "Azimuth", size_hint=(.1,.1), pos_hint={'x':.45,'y':.4}, color = (0,0,0,1))
+
+        self.elev_text.font_size = '80dp'
+        self.az_text.font_size = '80dp'
+        self.elevation_label.font_size = '50dp'
+        self.azimuth_label.font_size = '50dp'
         self.inc_elev.font_size = '60dp'
         self.dec_elev.font_size = '100dp'
         self.inc_az.font_size = '60dp'
         self.dec_az.font_size = '100dp'
-        self.execute.font_size = '40dp'
-        self.movingStatus.font_size = '40dp'
+        self.dish_status.font_size = '30dp'
+        self.movingStatus.font_size = '30dp'
 
         self.add_widget(self.elev_text)
         self.add_widget(self.az_text)
@@ -78,56 +96,94 @@ class DishLayout(FloatLayout):
         self.add_widget(self.dec_az)
         self.add_widget(self.execute)
         self.add_widget(self.movingStatus)
+        self.add_widget(self.dish_status)
+        self.add_widget(self.exit)
+        self.add_widget(self.calibrate)
 
     def on_elev_slider(self, instance, val):
-        self.movingStatus.text = "Dish: SET"
+        self.movingStatus.text = "SET"
         self.elevation = val
         self.elevation_label.text = format(self.elevation, ".2f")
 
     def on_az_slider(self, instance, val):
-        self.movingStatus.text = "Dish: SET"
+        self.movingStatus.text = "SET"
         self.azimuth = val
         self.azimuth_label.text = format(self.azimuth, ".2f")
 
     def decAz(self,event):
-        self.movingStatus.text = "Dish: SET"
+        self.movingStatus.text = "ROTATING"
         self.azimuth = self.azimuth - .05
         self.azimuth = round(self.azimuth, 2)
         if self.azimuth < 0:
             self.azimuth = 0
+        GPIO.output(33, GPIO.HIGH)
+        GPIO.output(35, GPIO.HIGH)
+        #### rotate the dish
+        GPIO.output(self.rotate_left, GPIO.LOW)
+        GPIO.output(self.rotate_right, GPIO.HIGH)
         self.azimuth_label.text = format(self.azimuth, ".2f")
+        self.movingStatus.text = "SET"
     
     def decElev(self,event):
-        self.movingStatus.text = "Dish: SET"
+        self.movingStatus.text = "LOWERING"
         self.elevation = self.elevation - .05
         self.elevation = round(self.elevation, 2)
         if self.elevation < 0:
             self.elevation = 0
+        GPIO.output(15, GPIO.HIGH)
+        GPIO.output(16, GPIO.HIGH)
+        #### extend the linear actuator
+        GPIO.output(self.RPWM_Output, GPIO.LOW)
+        GPIO.output(self.LPWM_Output, GPIO.HIGH)
         self.elevation_label.text = format(self.elevation, ".2f")
+        self.movingStatus.text = "SET"
     
     def incAz(self,event):
-        self.movingStatus.text = "Dish: SET"
+        self.movingStatus.text = "ROTATING"
         self.azimuth = self.azimuth + .05
         self.azimuth = round(self.azimuth, 2)
         if self.azimuth > 180:
             self.azimuth = 180
+        GPIO.output(15, GPIO.HIGH)
+        GPIO.output(16, GPIO.HIGH)
+        #### rotate the slew drive
+        GPIO.output(self.rotate_left, GPIO.HIGH)
+        GPIO.output(self.rotate_right, GPIO.LOW)
         self.azimuth_label.text = format(self.azimuth, ".2f")
+        self.movingStatus.text = "SET"
     
     def incElev(self,event):
-        self.movingStatus.text = "Dish: SET"
+        self.movingStatus.text = "RAISING"
         self.elevation = self.elevation + .05
         self.elevation = round(self.elevation, 2)
         if self.elevation > 90:
             self.elevation = 90
+        GPIO.output(33, GPIO.HIGH)
+        GPIO.output(35, GPIO.HIGH)
+        #### retract the linear actuator
+        GPIO.output(self.RPWM_Output, GPIO.HIGH)
+        GPIO.output(self.LPWM_Output, GPIO.LOW)
         self.elevation_label.text = format(self.elevation, ".2f")
+        self.movingStatus.text = "SET"
+
+    def calibration(self,event):
+        self.movingStatus.text = "CALIBRATING"
         
     def moveDish(self,event):
-        self.movingStatus.text = "Dish: MOVING"
+        self.movingStatus.text = "MOVING"
+        GPIO.output(self.rotate_left, GPIO.LOW)
+        GPIO.output(self.rotate_right, GPIO.LOW)
+        GPIO.output(self.RPWM_Output, GPIO.LOW)
+        GPIO.output(self.LPWM_Output, GPIO.LOW)
         # angle = float(self.azimuth)
         # servo1.ChangeDutyCycle(2.9+(angle/17))
         # time.sleep(1)
         # servo1.ChangeDutyCycle(0)
-        # self.movingStatus.text = "Dish: SET"
+        #### make any changes to elevation or azimuth
+
+    def exitProgram(self,event):
+        GPIO.cleanup()
+        Window.close()
 
 class DishApp(App):
     def build(self):
