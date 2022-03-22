@@ -69,7 +69,7 @@ class DishLayout(FloatLayout):
         self.dec_az = Button(text = "-", size_hint=(.2, .15),pos_hint={'x':.18, 'y':.22}, on_release = self.decAz, background_color = (0.7,0.8,0.9,1))
         self.execute = Button(text = "Execute Scroll Change", size_hint = (.25,.1), pos_hint={'x':.13,'y':.02}, on_release = self.moveDish, background_color = (0,0.8,0.4,1))
         self.exit = Button(text = "Exit", size_hint = (.25,.1), pos_hint={'x':.63,'y':.02}, on_release = self.exitProgram, background_color = (0.6,0.1,0,1))
-        self.calibrate = Button(text = "Calibrate", size_hint = (.25,.1), pos_hint={'x':.38,'y':.02}, on_release = self.calibration, background_color = (0.8,0.8,0,1), disabled = True)
+        self.calibrate = Button(text = "Calibrate", size_hint = (.25,.1), pos_hint={'x':.38,'y':.02}, on_release = self.calibration, background_color = (0.8,0.8,0,1))
 
         # labels
         self.elev_text = Label(text = "Elevation", size_hint=(.1,.1), pos_hint={'x':.45,'y':.8}, color = (0,0,0,1))
