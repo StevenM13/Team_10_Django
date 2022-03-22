@@ -39,7 +39,7 @@ Window.clearcolor = (0.5,0.5,0.6,0.9)
 Window.fullscreen = 'auto'
 
 class DishLayout(FloatLayout):
-    elevation = 45.0
+    elevation = 36.0
     azimuth = 90.0
     LPWM_Output = 11
     RPWM_Output = 13
