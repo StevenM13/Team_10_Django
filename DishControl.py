@@ -55,7 +55,7 @@ class DishLayout(FloatLayout):
         self.movingStatus = Label(text = "SET", size_hint=(.1, .1), pos_hint={'x':.83,'y':.4}, color = (0,0,0,1))
 
         # sliders
-        self.elevationControl = Slider(min = 0, max = 90, size_hint=(.63, .2), pos_hint={'x':.18,'y':.49}, sensitivity = 'handle', value = self.elevation, step = 1, cursor_size = ("30sp", "40sp"))
+        self.elevationControl = Slider(min = 0, max = 72, size_hint=(.63, .2), pos_hint={'x':.18,'y':.49}, sensitivity = 'handle', value = self.elevation, step = 1, cursor_size = ("30sp", "40sp"))
         self.elevationControl.fbind('value', self.on_elev_slider)
         self.add_widget(self.elevationControl)
         self.azimuthControl = Slider(min = 0, max = 180, size_hint=(.63, .2), pos_hint={'x':.18,'y':.09}, sensitivity = 'handle', value = self.azimuth, step = 1, cursor_size = ("30sp", "40sp"))
@@ -156,8 +156,8 @@ class DishLayout(FloatLayout):
         self.movingStatus.text = "RAISING"
         self.elevation = self.elevation + .05
         self.elevation = round(self.elevation, 2)
-        if self.elevation > 90:
-            self.elevation = 90
+        if self.elevation > 72:
+            self.elevation = 72
         GPIO.output(33, GPIO.HIGH)
         GPIO.output(35, GPIO.HIGH)
         #### retract the linear actuator
