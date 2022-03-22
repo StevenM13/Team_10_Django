@@ -26,15 +26,6 @@ GPIO.setup(31,GPIO.OUT)
 GPIO.setup(33,GPIO.OUT)
 GPIO.setup(35,GPIO.OUT)
 
-# self.LPWM_Output = GPIO.PWM(11,50)
-# self.RPWM_Output = GPIO.PWM(29,50)
-# servo1 = GPIO.PWM(11,50) # Note 11 is pin, 50 = 50Hz pulse
-
-# #start PWM running, but with value of 0 (pulse off)
-# servo1.start(0)
-# print ("Waiting for 2 seconds")
-# time.sleep(2)
-
 Window.clearcolor = (0.5,0.5,0.6,0.9)
 Window.fullscreen = 'auto'
 
