@@ -166,10 +166,6 @@ class DishLayout(FloatLayout):
         GPIO.output(self.rotate_right, GPIO.LOW)
         GPIO.output(self.RPWM_Output, GPIO.LOW)
         GPIO.output(self.LPWM_Output, GPIO.LOW)
-        # angle = float(self.azimuth)
-        # servo1.ChangeDutyCycle(2.9+(angle/17))
-        # time.sleep(1)
-        # servo1.ChangeDutyCycle(0)
         #### make any changes to elevation or azimuth
 
     def exitProgram(self,event):
