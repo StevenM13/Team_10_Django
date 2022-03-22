@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Encoding=UTF-8
+Name= DISH GUI
+Exec=/usr/bin/python3 /home/pi/Documents/DishGUI/Team_10_Django/DishControl.py
+Icon=/home/pi/Documents/DishIcon.png
+StartupNotify=false
+Terminal=false
