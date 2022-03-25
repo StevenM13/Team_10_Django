@@ -90,6 +90,67 @@ class DishLayout(FloatLayout):
         self.add_widget(self.dish_status)
         self.add_widget(self.exit)
         self.add_widget(self.calibrate)
+        
+    # calibration steps
+        self.verify_elev = Button(text = "Click when linear motor is retracted", size_hint = (.25,.1), pos_hint={'x':.13,'y':.02}, on_release = self.elev_calibrated, background_color = (0,0.8,0.4,1))
+        self.verify_az = Button(text = "Click when facing South", size_hint = (.25,.1), pos_hint={'x':.13,'y':.02}, on_release = self.calibrated, background_color = (0,0.8,0.4,1))
+        
+    def calibration(self,event):
+        self.movingStatus.text = "CALIBRATING"
+        self.add_widget(self.verif_elev)
+        GPIO.output(15, GPIO.HIGH)
+        GPIO.output(16, GPIO.HIGH)
+        #### retract the linear actuator
+        GPIO.output(self.RPWM_Output, GPIO.HIGH)
+        GPIO.output(self.LPWM_Output, GPIO.LOW)
+        self.elevationControl.disabled = True
+        self.azimuthControl.disabled = True
+        self.execute.disabled = True
+        self.calibrate.disabled = True
+        self.inc_elev.disabled = True
+        self.dec_elev.disabled = True
+        self.inc_az.disabled = True
+        self.dec_az.disabled = True
+           
+    def elev_calibrated(self,event):
+        self.remove_widget(self.verify_elev)
+        #### stop the linear actuator
+        GPIO.output(15, GPIO.LOW)
+        GPIO.output(16, GPIO.LOW)
+        GPIO.output(self.RPWM_Output, GPIO.HIGH)
+        GPIO.output(self.LPWM_Output, GPIO.LOW)
+        self.add_widget(self.verify_az)
+        #### rotate the slew drive
+        GPIO.output(33, GPIO.HIGH)
+        GPIO.output(35, GPIO.HIGH)
+        GPIO.output(self.rotate_left, GPIO.LOW)
+        GPIO.output(self.rotate_right, GPIO.HIGH)
+        
+    def calibrated(self,event):
+        self.movingStatus.text = "CALIBRATED"
+        self.remove_widget(self.verif_az)
+        #### stop the slew drive
+        GPIO.output(33, GPIO.LOW)
+        GPIO.output(35, GPIO.LOW)
+        GPIO.output(self.rotate_left, GPIO.LOW)
+        GPIO.output(self.rotate_right, GPIO.LOW)
+        self.elevationControl.disabled = False
+        self.azimuthControl.disabled = False
+        self.execute.disabled = False
+        self.calibrate.disabled = False
+        self.inc_elev.disabled = False
+        self.dec_elev.disabled = False
+        self.inc_az.disabled = False
+        self.dec_az.disabled = False
+        ### set the new values
+        self.elevation = 72
+        self.elevation = round(self.elevation, 2)
+        self.elevationControl.value = self.elevation
+        self.azimuth = 90
+        self.azimuth = round(self.azimuth, 2)
+        self.azimuthControl.value = self.azimuth
+    
+    # various functions for the buttons
 
     def on_elev_slider(self, instance, val):
         self.movingStatus.text = "SET"
@@ -107,6 +168,7 @@ class DishLayout(FloatLayout):
         self.azimuth = round(self.azimuth, 2)
         if self.azimuth < 0:
             self.azimuth = 0
+        self.azimuthControl.value = self.azimuth
         GPIO.output(33, GPIO.HIGH)
         GPIO.output(35, GPIO.HIGH)
         #### rotate the dish
@@ -121,6 +183,7 @@ class DishLayout(FloatLayout):
         self.elevation = round(self.elevation, 2)
         if self.elevation < 0:
             self.elevation = 0
+        self.elevationControl.value = self.elevation
         GPIO.output(15, GPIO.HIGH)
         GPIO.output(16, GPIO.HIGH)
         #### extend the linear actuator
@@ -135,8 +198,9 @@ class DishLayout(FloatLayout):
         self.azimuth = round(self.azimuth, 2)
         if self.azimuth > 180:
             self.azimuth = 180
-        GPIO.output(15, GPIO.HIGH)
-        GPIO.output(16, GPIO.HIGH)
+        self.azimuthControl.value = self.azimuth
+        GPIO.output(33, GPIO.HIGH)
+        GPIO.output(35, GPIO.HIGH)
         #### rotate the slew drive
         GPIO.output(self.rotate_left, GPIO.HIGH)
         GPIO.output(self.rotate_right, GPIO.LOW)
@@ -149,6 +213,7 @@ class DishLayout(FloatLayout):
         self.elevation = round(self.elevation, 2)
         if self.elevation > 72:
             self.elevation = 72
+        self.elevationControl.value = self.elevation
         GPIO.output(33, GPIO.HIGH)
         GPIO.output(35, GPIO.HIGH)
         #### retract the linear actuator
@@ -156,9 +221,6 @@ class DishLayout(FloatLayout):
         GPIO.output(self.LPWM_Output, GPIO.LOW)
         self.elevation_label.text = format(self.elevation, ".2f")
         self.movingStatus.text = "SET"
-
-    def calibration(self,event):
-        self.movingStatus.text = "CALIBRATING"
         
     def moveDish(self,event):
         self.movingStatus.text = "MOVING"
