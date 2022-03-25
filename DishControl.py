@@ -36,6 +36,9 @@ class DishLayout(FloatLayout):
     RPWM_Output = 13
     rotate_left = 29
     rotate_right = 31
+    oldAzimuth = 0
+    oldElevation = 0
+    difference = 0
 
     def __init__(self,**kwargs):
         super(DishLayout,self).__init__(**kwargs)
@@ -163,15 +166,18 @@ class DishLayout(FloatLayout):
         self.azimuth_label.text = format(self.azimuth, ".2f")
 
     def decAz(self,event):
+        self.oldAzimuth = self.azimuth
         self.movingStatus.text = "ROTATING"
         self.azimuth = self.azimuth - .05
         self.azimuth = round(self.azimuth, 2)
         if self.azimuth < 0:
             self.azimuth = 0
         self.azimuthControl.value = self.azimuth
+        ### Calculate the difference
+       
+        #### rotate the dish by applying the difference
         GPIO.output(33, GPIO.HIGH)
         GPIO.output(35, GPIO.HIGH)
-        #### rotate the dish
         GPIO.output(self.rotate_left, GPIO.LOW)
         GPIO.output(self.rotate_right, GPIO.HIGH)
         self.azimuth_label.text = format(self.azimuth, ".2f")
