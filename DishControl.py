@@ -38,7 +38,10 @@ class DishLayout(FloatLayout):
     rotate_right = 31
     oldAzimuth = 0
     oldElevation = 0
-    difference = 0
+    azimuthChange = 0
+    prevArdValue = 0
+    fifths = 0
+    azimuthEncoder = 0
 
     def __init__(self,**kwargs):
         super(DishLayout,self).__init__(**kwargs)
@@ -230,11 +233,21 @@ class DishLayout(FloatLayout):
         
     def moveDish(self,event):
         self.movingStatus.text = "MOVING"
-        GPIO.output(self.rotate_left, GPIO.LOW)
-        GPIO.output(self.rotate_right, GPIO.LOW)
+        self.prevArdVal = # GET THE VALUE FROM THE ARDUINO
+        #### make any changes to elevation or azimuth
+        self.fifths = self.difference / 0.05
+        self.azimuthChange = 9 * self.fifths
+        self.azimuthEncoder = self.prevArdVal
+        #### rotate the slew drive
+        GPIO.output(33, GPIO.HIGH)
+        GPIO.output(35, GPIO.HIGH)
+        while (self.prevArdVal - self.azimuthEncoder < self.azimuthChange):
+            # determine which direction to go
+            GPIO.output(self.rotate_left, GPIO.HIGH)
+            GPIO.output(self.rotate_right, GPIO.LOW)
+            self.azimuthEncoder = # get the encoder value
         GPIO.output(self.RPWM_Output, GPIO.LOW)
         GPIO.output(self.LPWM_Output, GPIO.LOW)
-        #### make any changes to elevation or azimuth
 
     def exitProgram(self,event):
         GPIO.cleanup()
