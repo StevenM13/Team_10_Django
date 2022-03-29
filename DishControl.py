@@ -38,10 +38,7 @@ class DishLayout(FloatLayout):
     rotate_right = 31
     oldAzimuth = 0
     oldElevation = 0
-    azimuthChange = 0
-    prevArdValue = 0
-    fifths = 0
-    azimuthEncoder = 0
+    elevationChange = 0
 
     def __init__(self,**kwargs):
         super(DishLayout,self).__init__(**kwargs)
@@ -176,57 +173,88 @@ class DishLayout(FloatLayout):
         if self.azimuth < 0:
             self.azimuth = 0
         self.azimuthControl.value = self.azimuth
-        ### Calculate the difference
-       
-        #### rotate the dish by applying the difference
+        #### rotate the dish to the right
         GPIO.output(33, GPIO.HIGH)
         GPIO.output(35, GPIO.HIGH)
         GPIO.output(self.rotate_left, GPIO.LOW)
         GPIO.output(self.rotate_right, GPIO.HIGH)
+        ################# MATH NEEDED TO KNOW WHEN TO STOP ##################
+        #### FILL IN WITH CODE to read the encoder on the slew drive
+        # turn off motor
+        GPIO.output(33, GPIO.LOW)
+        GPIO.output(35, GPIO.LOW)
+        GPIO.output(self.rotate_left, GPIO.LOW)
+        GPIO.output(self.rotate_right, GPIO.LOW)
         self.azimuth_label.text = format(self.azimuth, ".2f")
         self.movingStatus.text = "SET"
     
     def decElev(self,event):
+        self.oldElevation = self.elevation
         self.movingStatus.text = "LOWERING"
         self.elevation = self.elevation - .05
         self.elevation = round(self.elevation, 2)
         if self.elevation < 0:
             self.elevation = 0
         self.elevationControl.value = self.elevation
+        #### extend the linear actuator
         GPIO.output(15, GPIO.HIGH)
         GPIO.output(16, GPIO.HIGH)
-        #### extend the linear actuator
         GPIO.output(self.RPWM_Output, GPIO.LOW)
         GPIO.output(self.LPWM_Output, GPIO.HIGH)
+        ################# MATH NEEDED TO KNOW WHEN TO STOP ##################
+        ### HERE IS SOME BASIC CODE THAT DOES NOT VERIFY THE VALUES, so change for precision
+        time.sleep(0.23)   # it takes 0.23 seconds to move 0.05 degrees
+        # turn off motor
+        GPIO.output(15, GPIO.LOW)
+        GPIO.output(16, GPIO.LOW)
+        GPIO.output(self.RPWM_Output, GPIO.LOW)
+        GPIO.output(self.LPWM_Output, GPIO.LOW)
         self.elevation_label.text = format(self.elevation, ".2f")
         self.movingStatus.text = "SET"
     
     def incAz(self,event):
+        self.oldAzimuth = self.azimuth
         self.movingStatus.text = "ROTATING"
         self.azimuth = self.azimuth + .05
         self.azimuth = round(self.azimuth, 2)
         if self.azimuth > 180:
             self.azimuth = 180
         self.azimuthControl.value = self.azimuth
+        #### rotate the slew drive to the left
         GPIO.output(33, GPIO.HIGH)
         GPIO.output(35, GPIO.HIGH)
-        #### rotate the slew drive
         GPIO.output(self.rotate_left, GPIO.HIGH)
+        GPIO.output(self.rotate_right, GPIO.LOW)
+        ################# MATH NEEDED TO KNOW WHEN TO STOP ##################
+        #### FILL IN WITH CODE to read the encoder on the slew drive
+        # turn off motor
+        GPIO.output(33, GPIO.LOW)
+        GPIO.output(35, GPIO.LOW)
+        GPIO.output(self.rotate_left, GPIO.LOW)
         GPIO.output(self.rotate_right, GPIO.LOW)
         self.azimuth_label.text = format(self.azimuth, ".2f")
         self.movingStatus.text = "SET"
     
     def incElev(self,event):
+        self.oldElevation = self.elevation
         self.movingStatus.text = "RAISING"
         self.elevation = self.elevation + .05
         self.elevation = round(self.elevation, 2)
         if self.elevation > 72:
             self.elevation = 72
         self.elevationControl.value = self.elevation
+        #### retract the linear actuator
         GPIO.output(33, GPIO.HIGH)
         GPIO.output(35, GPIO.HIGH)
-        #### retract the linear actuator
         GPIO.output(self.RPWM_Output, GPIO.HIGH)
+        GPIO.output(self.LPWM_Output, GPIO.LOW)
+        ################# MATH NEEDED TO KNOW WHEN TO STOP ##################
+        ### HERE IS SOME BASIC CODE THAT DOES NOT VERIFY THE VALUES, so change for precision
+        time.sleep(0.23)   # it takes 0.23 seconds to move 0.05 degrees
+        # turn off motor
+        GPIO.output(15, GPIO.LOW)
+        GPIO.output(16, GPIO.LOW)
+        GPIO.output(self.RPWM_Output, GPIO.LOW)
         GPIO.output(self.LPWM_Output, GPIO.LOW)
         self.elevation_label.text = format(self.elevation, ".2f")
         self.movingStatus.text = "SET"
@@ -241,11 +269,34 @@ class DishLayout(FloatLayout):
         #### rotate the slew drive
         GPIO.output(33, GPIO.HIGH)
         GPIO.output(35, GPIO.HIGH)
-        while (self.prevArdVal - self.azimuthEncoder < self.azimuthChange):
-            # determine which direction to go
+        # determine whether to rotate left or right the slew drive
+        if self.oldAzimuth > self.azimuth:  # decrease
+            GPIO.output(self.rotate_left, GPIO.LOW)
+            GPIO.output(self.rotate_right, GPIO.HIGH)
+        else: 
             GPIO.output(self.rotate_left, GPIO.HIGH)
             GPIO.output(self.rotate_right, GPIO.LOW)
-            self.azimuthEncoder = # get the encoder value
+        ################# MATH NEEDED TO KNOW WHEN TO STOP ##################
+        #### FILL IN WITH CODE to read the encoder on the slew drive
+        # turn off motor
+        GPIO.output(33, GPIO.LOW)
+        GPIO.output(35, GPIO.LOW)
+        GPIO.output(self.rotate_left, GPIO.LOW)
+        GPIO.output(self.rotate_right, GPIO.LOW)
+        # determine wether to extend or retract the linear actuatot
+        if self.oldElevation > self.elevation:  # decrease
+            GPIO.output(self.RPWM_Output, GPIO.LOW)
+            GPIO.output(self.LPWM_Output, GPIO.HIGH)
+        else: 
+            GPIO.output(self.RPWM_Output, GPIO.HIGH)
+            GPIO.output(self.LPWM_Output, GPIO.LOW)
+        ################# MATH NEEDED TO KNOW WHEN TO STOP ##################
+        ### HERE IS SOME BASIC CODE THAT DOES NOT VERIFY THE VALUES, so change for precision
+        self.elevationChange = abs(self.oldElevation - self.elevation)
+        time.sleep(elevationChange * 4.6)   # we calculated that it takes 23 seconds to move 5 degrees, or 4.6 seconds for 1 degree
+        # turn off motor
+        GPIO.output(15, GPIO.LOW)
+        GPIO.output(16, GPIO.LOW)
         GPIO.output(self.RPWM_Output, GPIO.LOW)
         GPIO.output(self.LPWM_Output, GPIO.LOW)
 
