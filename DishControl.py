@@ -261,16 +261,11 @@ class DishLayout(FloatLayout):
         
     def moveDish(self,event):
         self.movingStatus.text = "MOVING"
-        self.prevArdVal = # GET THE VALUE FROM THE ARDUINO
-        #### make any changes to elevation or azimuth
-        self.fifths = self.difference / 0.05
-        self.azimuthChange = 9 * self.fifths
-        self.azimuthEncoder = self.prevArdVal
         #### rotate the slew drive
         GPIO.output(33, GPIO.HIGH)
         GPIO.output(35, GPIO.HIGH)
-        # determine whether to rotate left or right the slew drive
-        if self.oldAzimuth > self.azimuth:  # decrease
+        # determine whether to rotate the motor clockwise or counter clockwise
+        if self.oldAzimuth > self.azimuth:  # clockwise (decrease angle)
             GPIO.output(self.rotate_left, GPIO.LOW)
             GPIO.output(self.rotate_right, GPIO.HIGH)
         else: 
@@ -283,8 +278,8 @@ class DishLayout(FloatLayout):
         GPIO.output(35, GPIO.LOW)
         GPIO.output(self.rotate_left, GPIO.LOW)
         GPIO.output(self.rotate_right, GPIO.LOW)
-        # determine wether to extend or retract the linear actuatot
-        if self.oldElevation > self.elevation:  # decrease
+        # determine wether to extend or retract the linear actuator
+        if self.oldElevation > self.elevation:  # extend (decrease angle)
             GPIO.output(self.RPWM_Output, GPIO.LOW)
             GPIO.output(self.LPWM_Output, GPIO.HIGH)
         else: 
