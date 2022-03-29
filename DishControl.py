@@ -39,6 +39,10 @@ class DishLayout(FloatLayout):
     oldAzimuth = 0
     oldElevation = 0
     elevationChange = 0
+    difference = 0
+    encoderVal = 0
+    prevEncoderVal = 0
+    azimuthChange = 0
 
     def __init__(self,**kwargs):
         super(DishLayout,self).__init__(**kwargs)
@@ -178,8 +182,17 @@ class DishLayout(FloatLayout):
         GPIO.output(35, GPIO.HIGH)
         GPIO.output(self.rotate_left, GPIO.LOW)
         GPIO.output(self.rotate_right, GPIO.HIGH)
-        ################# MATH NEEDED TO KNOW WHEN TO STOP ##################
-        #### FILL IN WITH CODE to read the encoder on the slew drive
+#         ################# MATH NEEDED TO KNOW WHEN TO STOP ##################
+#         #### FILL IN WITH CODE to read the encoder on the slew drive
+#         ### pseudocode that MAY contain bugs
+#         self.azimuthChange = self.prevEncoderVal - 9      # should change by 9 per 0.05 degrees moved
+#         while self.encoderVal > self.azimuthChange:
+#             self.difference = self.azimuthChange - self.encoderVal
+#             self.encoderVal = # read in the encoder val via the arduino
+#             # check for rollover
+#             if self.encoderVal > self.prevEncoderVal:
+#                 self.azimuthChange = self.encoderVal + self.difference
+#                 self.prevEncoderVal = self.encoderVal
         # turn off motor
         GPIO.output(33, GPIO.LOW)
         GPIO.output(35, GPIO.LOW)
@@ -227,6 +240,15 @@ class DishLayout(FloatLayout):
         GPIO.output(self.rotate_right, GPIO.LOW)
         ################# MATH NEEDED TO KNOW WHEN TO STOP ##################
         #### FILL IN WITH CODE to read the encoder on the slew drive
+        ### pseudocode that MAY contain bugs
+#         self.azimuthChange = self.prevEncoderVal + 9      # should change by 9 per 0.05 degrees moved
+#         while self.encoderVal < self.azimuthChange:
+#             self.difference = self.azimuthChange - self.encoderVal
+#             self.encoderVal = # read in the encoder val via the arduino
+#             # check for rollover
+#             if self.encoderVal < self.prevEncoderVal:
+#                 self.azimuthChange = self.encoderVal + self.difference
+#                 self.prevEncoderVal = self.encoderVal
         # turn off motor
         GPIO.output(33, GPIO.LOW)
         GPIO.output(35, GPIO.LOW)
@@ -261,6 +283,9 @@ class DishLayout(FloatLayout):
         
     def moveDish(self,event):
         self.movingStatus.text = "MOVING"
+        # get readings from the encoder
+#         self.prevEncoderVal = # get encoder values from arduino
+#         self.encoderVal = self.prevEncoderVal
         #### rotate the slew drive
         GPIO.output(33, GPIO.HIGH)
         GPIO.output(35, GPIO.HIGH)
@@ -268,11 +293,31 @@ class DishLayout(FloatLayout):
         if self.oldAzimuth > self.azimuth:  # clockwise (decrease angle)
             GPIO.output(self.rotate_left, GPIO.LOW)
             GPIO.output(self.rotate_right, GPIO.HIGH)
+            ################# MATH NEEDED TO KNOW WHEN TO STOP ##################
+            #### FILL IN WITH CODE to read the encoder on the slew drive
+            ### pseudocode that MAY contain bugs
+#             self.azimuthChange = self.prevEncoderVal - (180 * (self.oldAzimuth - self.azimuth)    # needs to be 180 value difference for each 1 degree
+#             while self.encoderVal > self.azimuthChange:
+#                 self.difference = self.azimuthChange - self.encoderVal
+#                 self.encoderVal = # read in the encoder val via the arduino
+#                 # check for rollover
+#                 if self.encoderVal > self.prevEncoderVal:
+#                     self.azimuthChange = self.encoderVal + self.difference
+#                     self.prevEncoderVal = self.encoderVal
         else: 
             GPIO.output(self.rotate_left, GPIO.HIGH)
             GPIO.output(self.rotate_right, GPIO.LOW)
-        ################# MATH NEEDED TO KNOW WHEN TO STOP ##################
-        #### FILL IN WITH CODE to read the encoder on the slew drive
+            ################# MATH NEEDED TO KNOW WHEN TO STOP ##################
+            #### FILL IN WITH CODE to read the encoder on the slew drive
+            ### pseudocode that MAY contain bugs
+#             self.azimuthChange = self.prevEncoderVal + (180 * (self.azimuth - self.oldAzimuth)    # needs to be 180 value difference for each 1 degree
+#             while self.encoderVal < self.azimuthChange:
+#                 self.difference = self.azimuthChange - self.encoderVal
+#                 self.encoderVal = # read in the encoder val via the arduino
+#                 # check for rollover
+#                 if self.encoderVal < self.prevEncoderVal:
+#                     self.azimuthChange = self.encoderVal + self.difference
+#                     self.prevEncoderVal = self.encoderVal
         # turn off motor
         GPIO.output(33, GPIO.LOW)
         GPIO.output(35, GPIO.LOW)
